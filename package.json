@@ -1,0 +1,31 @@
+{
+  "name": "aid",
+  "version": "0.0.1",
+  "private": true,
+  "description": "AID — AI Directory: Discover and explore AI tools",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,astro,js,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,astro,js,json,md,yaml,yml}\""
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-astro": "^0.14.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  }
+}

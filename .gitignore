@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.astro/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+.playwright/
+
+# Docker volumes (if accidentally created locally)
+docker/postgres/data/
+docker/directus/uploads/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Turbo
+.turbo/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

@@ -1,0 +1,10 @@
+# Production overrides — use with: docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+services:
+  postgres:
+    restart: always
+    ports: []  # Do not expose Postgres port in production
+
+  directus:
+    restart: always
+    environment:
+      NODE_ENV: production
