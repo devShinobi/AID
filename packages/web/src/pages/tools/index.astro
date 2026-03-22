@@ -1,0 +1,147 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ToolCard from "@/components/ToolCard.astro";
+import Pagination from "@/components/Pagination.astro";
+import { fetchTools } from "@/lib/queries/tools";
+import { fetchGroups } from "@/lib/queries/groups";
+import {
+  getPageFromUrl,
+  buildPaginationMeta,
+  DEFAULT_PAGE_SIZE,
+} from "@/lib/utils/pagination";
+import { PRICING_TYPE_LABELS, PRICING_TYPES } from "@aid/shared/constants";
+
+const url = Astro.url;
+const page = getPageFromUrl(url);
+const groupSlug = url.searchParams.get("group") ?? undefined;
+const pricingType = url.searchParams.get("pricing") as any ?? undefined;
+const search = url.searchParams.get("q") ?? undefined;
+
+const [{ tools, total }, groups] = await Promise.all([
+  fetchTools({ page, groupSlug, pricingType, search }),
+  fetchGroups(),
+]);
+
+const meta = buildPaginationMeta(page, DEFAULT_PAGE_SIZE, total);
+
+// Extra params to preserve in pagination links
+const extraParams: Record<string, string> = {};
+if (groupSlug) extraParams["group"] = groupSlug;
+if (pricingType) extraParams["pricing"] = pricingType;
+if (search) extraParams["q"] = search;
+---
+
+<BaseLayout title="Browse AI Tools" description="Browse and filter the best AI tools by category and pricing.">
+  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-8 lg:flex-row">
+
+      <!-- Sidebar filters -->
+      <aside class="w-full shrink-0 lg:w-56">
+        <form method="get" action="/tools">
+          <!-- Search -->
+          <div class="mb-6">
+            <label for="q" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Search
+            </label>
+            <input
+              id="q"
+              name="q"
+              type="search"
+              value={search ?? ""}
+              placeholder="Search tools…"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+
+          <!-- Groups -->
+          <div class="mb-6">
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Category</p>
+            <div class="space-y-1">
+              <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                <input type="radio" name="group" value="" checked={!groupSlug} class="accent-indigo-600" />
+                All
+              </label>
+              {groups.map((g) => (
+                <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="radio"
+                    name="group"
+                    value={g.slug}
+                    checked={groupSlug === g.slug}
+                    class="accent-indigo-600"
+                  />
+                  {g.name}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <!-- Pricing -->
+          <div class="mb-6">
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Pricing</p>
+            <div class="space-y-1">
+              <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                <input type="radio" name="pricing" value="" checked={!pricingType} class="accent-indigo-600" />
+                Any
+              </label>
+              {PRICING_TYPES.map((pt) => (
+                <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="radio"
+                    name="pricing"
+                    value={pt}
+                    checked={pricingType === pt}
+                    class="accent-indigo-600"
+                  />
+                  {PRICING_TYPE_LABELS[pt]}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+          >
+            Apply Filters
+          </button>
+
+          {(groupSlug || pricingType || search) && (
+            <a
+              href="/tools"
+              class="mt-2 block text-center text-xs text-gray-400 hover:text-gray-700 transition-colors"
+            >
+              Clear filters
+            </a>
+          )}
+        </form>
+      </aside>
+
+      <!-- Main content -->
+      <div class="flex-1 min-w-0">
+        <div class="mb-4 flex items-center justify-between">
+          <h1 class="text-2xl font-bold text-gray-900">
+            {search ? `Results for "${search}"` : "All AI Tools"}
+          </h1>
+          <span class="text-sm text-gray-500">{total} tool{total !== 1 ? "s" : ""}</span>
+        </div>
+
+        {tools.length > 0 ? (
+          <>
+            <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {tools.map((tool) => <ToolCard tool={tool} />)}
+            </div>
+            <Pagination meta={meta} baseUrl="/tools" extraParams={extraParams} />
+          </>
+        ) : (
+          <div class="rounded-xl border border-dashed border-gray-300 py-20 text-center text-gray-400">
+            <p class="text-lg font-medium">No tools found</p>
+            <a href="/tools" class="mt-2 block text-sm text-indigo-500 hover:underline">
+              Clear filters
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

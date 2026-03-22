@@ -1,0 +1,201 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PricingBadge from "@/components/PricingBadge.astro";
+import FaqAccordion from "@/components/FaqAccordion.astro";
+import NewsCard from "@/components/NewsCard.astro";
+import { fetchToolBySlug } from "@/lib/queries/tools";
+import { formatDate, formatPricing } from "@/lib/utils/format";
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect("/tools");
+
+const tool = await fetchToolBySlug(slug);
+if (!tool) return Astro.redirect("/tools");
+
+const pricing = formatPricing(
+  tool.pricing_type,
+  tool.pricing_min,
+  tool.pricing_max,
+  tool.pricing_label
+);
+
+const answeredFaqs = tool.faq?.filter((f) => f.status === "answered") ?? [];
+---
+
+<BaseLayout title={tool.name} description={tool.overview.slice(0, 160)}>
+  <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">{tool.name}</h1>
+          <p class="mt-1 text-sm text-gray-400">Updated {formatDate(tool.updated_at)}</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <PricingBadge type={tool.pricing_type} />
+          <span class="text-sm font-medium text-gray-600">{pricing}</span>
+        </div>
+      </div>
+
+      <!-- Groups -->
+      {tool.groups && tool.groups.length > 0 && (
+        <div class="mt-3 flex flex-wrap gap-2">
+          {tool.groups.map((tg) => {
+            const g = typeof tg.group_id === "object" ? tg.group_id : null;
+            return g ? (
+              <a
+                href={`/tools?group=${g.slug}`}
+                class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
+              >
+                {g.name}
+              </a>
+            ) : null;
+          })}
+        </div>
+      )}
+    </div>
+
+    <!-- Overview -->
+    <section class="mb-10 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-3 text-lg font-semibold text-gray-900">Overview</h2>
+      <p class="text-gray-600 leading-relaxed whitespace-pre-line">{tool.overview}</p>
+    </section>
+
+    <!-- Pros & Cons -->
+    {(tool.pros?.length > 0 || tool.cons?.length > 0) && (
+      <section class="mb-10 grid gap-4 sm:grid-cols-2">
+        {tool.pros?.length > 0 && (
+          <div class="rounded-xl border border-green-200 bg-green-50 p-5">
+            <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-green-700">Pros</h2>
+            <ul class="space-y-2">
+              {tool.pros.map((pro) => (
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="mt-0.5 text-green-500">✓</span>
+                  {pro}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {tool.cons?.length > 0 && (
+          <div class="rounded-xl border border-red-200 bg-red-50 p-5">
+            <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-red-700">Cons</h2>
+            <ul class="space-y-2">
+              {tool.cons.map((con) => (
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <span class="mt-0.5 text-red-400">✗</span>
+                  {con}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    )}
+
+    <!-- Reviews -->
+    {tool.reviews && tool.reviews.length > 0 && (
+      <section class="mb-10">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">Reviews</h2>
+        <div class="space-y-4">
+          {tool.reviews.map((review) => (
+            <blockquote class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-600 leading-relaxed">"{review.review_text}"</p>
+              <footer class="mt-3 flex items-center justify-between">
+                <span class="text-xs text-gray-400">{formatDate(review.created_at)}</span>
+                {review.type === "expert" && (
+                  <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                    Expert
+                  </span>
+                )}
+              </footer>
+            </blockquote>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Alternatives -->
+    {tool.alternatives && tool.alternatives.length > 0 && (
+      <section class="mb-10">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">Alternatives</h2>
+        <div class="flex flex-wrap gap-3">
+          {tool.alternatives.map((alt) => (
+            <a
+              href={alt.alt_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+            >
+              {alt.alt_name} ↗
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Tutorials -->
+    {tool.tutorials && tool.tutorials.length > 0 && (
+      <section class="mb-10">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">Tutorials</h2>
+        <ul class="space-y-2">
+          {tool.tutorials.map((t) => (
+            <li>
+              <a
+                href={t.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 text-sm text-indigo-600 hover:underline"
+              >
+                {t.type === "video_embed" ? "▶" : "📄"} {t.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- Awards -->
+    {tool.awards && tool.awards.length > 0 && (
+      <section class="mb-10">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">Awards</h2>
+        <div class="flex flex-wrap gap-3">
+          {tool.awards.map((ta) => {
+            const award = typeof ta.award_id === "object" ? ta.award_id : null;
+            return award ? (
+              <div class="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+                {award.icon_url && <img src={award.icon_url} alt="" class="h-5 w-5" />}
+                {award.name}
+              </div>
+            ) : null;
+          })}
+        </div>
+      </section>
+    )}
+
+    <!-- FAQ -->
+    {answeredFaqs.length > 0 && (
+      <section class="mb-10">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">FAQ</h2>
+        <div class="space-y-2">
+          {answeredFaqs.map((faq) => <FaqAccordion faq={faq} />)}
+        </div>
+      </section>
+    )}
+
+    <!-- Related News -->
+    {tool.news && tool.news.length > 0 && (
+      <section class="mb-10">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">Related News</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+          {tool.news.slice(0, 4).map((item) => <NewsCard news={item} />)}
+        </div>
+      </section>
+    )}
+
+    <div class="border-t border-gray-200 pt-6 text-center">
+      <a href="/tools" class="text-sm text-indigo-600 hover:underline">← Back to all tools</a>
+    </div>
+  </div>
+</BaseLayout>

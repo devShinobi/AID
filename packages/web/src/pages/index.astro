@@ -1,0 +1,92 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ToolCard from "@/components/ToolCard.astro";
+import NewsCard from "@/components/NewsCard.astro";
+import { fetchFeaturedTools } from "@/lib/queries/tools";
+import { fetchLatestNews } from "@/lib/queries/news";
+
+const [featuredTools, latestNews] = await Promise.all([
+  fetchFeaturedTools(6),
+  fetchLatestNews(3),
+]);
+---
+
+<BaseLayout title="Home" description="Discover and explore the best AI tools.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-b from-indigo-50 to-white py-20">
+    <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+      <h1 class="text-5xl font-bold tracking-tight text-gray-900">
+        Discover the best <span class="text-indigo-600">AI tools</span>
+      </h1>
+      <p class="mt-4 text-xl text-gray-500">
+        Browse, compare, and find the right AI tool for your workflow.
+      </p>
+      <div class="mt-8 flex justify-center gap-4">
+        <a
+          href="/tools"
+          class="rounded-md bg-indigo-600 px-6 py-3 text-base font-medium text-white hover:bg-indigo-700 transition-colors"
+        >
+          Browse All Tools
+        </a>
+        <a
+          href="/submit"
+          class="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Submit a Tool
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Tools -->
+  {
+    featuredTools.length > 0 && (
+      <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-gray-900">Featured Tools</h2>
+          <a href="/tools" class="text-sm font-medium text-indigo-600 hover:underline">
+            View all →
+          </a>
+        </div>
+        <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {featuredTools.map((tool) => (
+            <ToolCard tool={tool} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Latest News -->
+  {
+    latestNews.length > 0 && (
+      <section class="bg-gray-50 py-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-gray-900">Latest News</h2>
+            <a href="/news" class="text-sm font-medium text-indigo-600 hover:underline">
+              View all →
+            </a>
+          </div>
+          <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {latestNews.map((item) => (
+              <NewsCard news={item} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- CTA -->
+  <section class="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-bold text-gray-900">Know a great AI tool?</h2>
+    <p class="mt-2 text-gray-500">Help the community by submitting it to AID.</p>
+    <a
+      href="/submit"
+      class="mt-6 inline-block rounded-md bg-indigo-600 px-6 py-3 text-base font-medium text-white hover:bg-indigo-700 transition-colors"
+    >
+      Submit a Tool
+    </a>
+  </section>
+</BaseLayout>

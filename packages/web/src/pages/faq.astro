@@ -1,0 +1,25 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import FaqAccordion from "@/components/FaqAccordion.astro";
+import { fetchAllAnsweredFaqs } from "@/lib/queries/faq";
+
+const faqs = await fetchAllAnsweredFaqs();
+---
+
+<BaseLayout title="FAQ" description="Frequently asked questions about AI tools on AID.">
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <h1 class="mb-2 text-3xl font-bold text-gray-900">FAQ</h1>
+    <p class="mb-8 text-gray-500">Answers to common questions about AI tools.</p>
+
+    {faqs.length > 0 ? (
+      <div class="space-y-2">
+        {faqs.map((faq) => <FaqAccordion faq={faq} />)}
+      </div>
+    ) : (
+      <div class="rounded-xl border border-dashed border-gray-300 py-20 text-center text-gray-400">
+        <p class="text-lg font-medium">No FAQs yet</p>
+        <p class="mt-1 text-sm">Check back soon.</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>

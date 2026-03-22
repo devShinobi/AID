@@ -1,0 +1,53 @@
+---
+import SearchBar from "@/components/react/SearchBar";
+
+const navLinks = [
+  { href: "/tools", label: "Browse Tools" },
+  { href: "/news", label: "News" },
+  { href: "/faq", label: "FAQ" },
+];
+
+const currentPath = Astro.url.pathname;
+const currentQuery = Astro.url.searchParams.get("q") ?? "";
+---
+
+<header class="border-b border-gray-200 bg-white shadow-sm">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <!-- Logo / Site name -->
+    <a href="/" class="flex shrink-0 items-center gap-2 text-indigo-600 hover:text-indigo-700">
+      <img src="/favicon.svg" alt="AID logo" width="28" height="28" />
+      <span class="text-xl font-bold tracking-tight">AID</span>
+      <span class="hidden text-sm text-gray-400 sm:inline">AI Directory</span>
+    </a>
+
+    <!-- Search bar (React island) -->
+    <div class="flex-1 max-w-xs">
+      <SearchBar initialQuery={currentQuery} client:visible />
+    </div>
+
+    <!-- Nav links -->
+    <nav class="flex items-center gap-1">
+      {
+        navLinks.map(({ href, label }) => (
+          <a
+            href={href}
+            class:list={[
+              "hidden rounded-md px-3 py-2 text-sm font-medium transition-colors md:block",
+              currentPath.startsWith(href)
+                ? "bg-indigo-50 text-indigo-600"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+            ]}
+          >
+            {label}
+          </a>
+        ))
+      }
+      <a
+        href="/submit"
+        class="ml-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+      >
+        Submit
+      </a>
+    </nav>
+  </div>
+</header>

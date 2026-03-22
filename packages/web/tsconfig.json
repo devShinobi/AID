@@ -1,0 +1,14 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@aid/shared": ["../shared/src/index.ts"],
+      "@aid/shared/*": ["../shared/src/*"]
+    }
+  },
+  "include": ["src/**/*", "src/env.d.ts", "__tests__/**/*"]
+}

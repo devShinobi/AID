@@ -1,0 +1,21 @@
+---
+import { PRICING_TYPE_LABELS } from "@aid/shared/constants";
+import type { PricingType } from "@aid/shared/types";
+
+interface Props {
+  type: PricingType;
+}
+
+const { type } = Astro.props;
+
+const colorMap: Record<PricingType, string> = {
+  free: "bg-green-100 text-green-700",
+  freemium: "bg-blue-100 text-blue-700",
+  paid: "bg-amber-100 text-amber-700",
+  open_source: "bg-purple-100 text-purple-700",
+};
+---
+
+<span class:list={["inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", colorMap[type]]}>
+  {PRICING_TYPE_LABELS[type]}
+</span>

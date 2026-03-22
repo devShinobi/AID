@@ -1,0 +1,49 @@
+---
+import { formatDate, truncate } from "@/lib/utils/format";
+import type { News } from "@aid/shared/types";
+
+interface Props {
+  news: News;
+}
+
+const { news } = Astro.props;
+const excerpt = truncate(news.content, 140);
+const date = formatDate(news.published_at ?? news.created_at);
+---
+
+<article class="flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+  <div class="flex items-start justify-between gap-2">
+    <h3 class="text-base font-semibold text-gray-900 leading-snug">
+      {news.title ?? "Untitled"}
+    </h3>
+    {
+      news.source_name && (
+        <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+          {news.source_name}
+        </span>
+      )
+    }
+  </div>
+
+  <p class="mt-2 flex-1 text-sm text-gray-500 leading-relaxed">{excerpt}</p>
+
+  <div class="mt-4 flex items-center justify-between">
+    <time class="text-xs text-gray-400">{date}</time>
+    {
+      news.source_url ? (
+        <a
+          href={news.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs font-medium text-indigo-600 hover:underline"
+        >
+          Read more →
+        </a>
+      ) : (
+        <a href={`/news/${news.id}`} class="text-xs font-medium text-indigo-600 hover:underline">
+          Read more →
+        </a>
+      )
+    }
+  </div>
+</article>

@@ -1,0 +1,17 @@
+{
+  "name": "@aid/scripts",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup-directus": "tsx setup-directus.ts",
+    "seed": "tsx seed.ts"
+  },
+  "dependencies": {
+    "@directus/sdk": "^18.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  }
+}

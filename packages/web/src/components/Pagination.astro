@@ -1,0 +1,82 @@
+---
+import type { PaginationMeta } from "@/lib/utils/pagination";
+
+interface Props {
+  meta: PaginationMeta;
+  baseUrl: string;
+  /** Extra query params to preserve (e.g. filters) */
+  extraParams?: Record<string, string>;
+}
+
+const { meta, baseUrl, extraParams = {} } = Astro.props;
+
+function buildUrl(page: number): string {
+  const params = new URLSearchParams({ ...extraParams, page: String(page) });
+  return `${baseUrl}?${params.toString()}`;
+}
+
+const pages = Array.from({ length: meta.totalPages }, (_, i) => i + 1);
+// Show at most 7 page numbers: first, last, current ±2, with ellipsis
+const visiblePages = pages.filter(
+  (p) => p === 1 || p === meta.totalPages || Math.abs(p - meta.page) <= 2
+);
+---
+
+{
+  meta.totalPages > 1 && (
+    <nav class="flex items-center justify-center gap-1 py-6" aria-label="Pagination">
+      <!-- Prev -->
+      {meta.hasPrev ? (
+        <a
+          href={buildUrl(meta.page - 1)}
+          class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          ← Prev
+        </a>
+      ) : (
+        <span class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-300 cursor-not-allowed">
+          ← Prev
+        </span>
+      )}
+
+      <!-- Page numbers -->
+      {visiblePages.map((p, i) => {
+        const prev = visiblePages[i - 1];
+        const showEllipsis = prev !== undefined && p - prev > 1;
+        return (
+          <>
+            {showEllipsis && (
+              <span class="px-2 py-2 text-sm text-gray-400">…</span>
+            )}
+            {p === meta.page ? (
+              <span class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white">
+                {p}
+              </span>
+            ) : (
+              <a
+                href={buildUrl(p)}
+                class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                {p}
+              </a>
+            )}
+          </>
+        );
+      })}
+
+      <!-- Next -->
+      {meta.hasNext ? (
+        <a
+          href={buildUrl(meta.page + 1)}
+          class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          Next →
+        </a>
+      ) : (
+        <span class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-300 cursor-not-allowed">
+          Next →
+        </span>
+      )}
+    </nav>
+  )
+}
