@@ -17,7 +17,7 @@ import {
 } from "@directus/sdk";
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL ?? "http://localhost:8055";
-const ADMIN_EMAIL = process.env.DIRECTUS_ADMIN_EMAIL ?? "admin@aid.local";
+const ADMIN_EMAIL = process.env.DIRECTUS_ADMIN_EMAIL ?? "admin@example.com";
 const ADMIN_PASSWORD = process.env.DIRECTUS_ADMIN_PASSWORD ?? "admin123";
 
 async function main() {
