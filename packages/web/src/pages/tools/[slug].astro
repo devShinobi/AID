@@ -20,19 +20,37 @@ const pricing = formatPricing(
 );
 
 const answeredFaqs = tool.faq?.filter((f) => f.status === "answered") ?? [];
+
+const AWARD_ICONS: Record<string, string> = {
+  "Editor's Choice": "🏆",
+  "Most Popular": "🔥",
+  "Best Free Tool": "🆓",
+  "Best for Developers": "💻",
+  "Best Image Generator": "🎨",
+  "Best Productivity Tool": "⚡",
+};
 ---
 
 <BaseLayout title={tool.name} description={tool.overview.slice(0, 160)}>
-  <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
 
-    <!-- Header -->
-    <div class="mb-8">
+  <!-- Hero -->
+  <div style="background: linear-gradient(180deg, #0d1117 0%, #080b10 100%); border-bottom: 1px solid #1f2937;">
+    <div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+
+      <!-- Top row: name + pricing -->
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-gray-100">{tool.name}</h1>
-          <p class="mt-1 text-sm text-gray-600">Updated {formatDate(tool.updated_at)}</p>
+          <div class="mb-2 flex flex-wrap items-center gap-3">
+            <h1 class="text-4xl font-bold text-white">{tool.name}</h1>
+            {tool.is_featured && (
+              <span class="rounded-full bg-indigo-900/60 px-3 py-1 text-xs font-semibold text-indigo-300 ring-1 ring-indigo-700">
+                Featured
+              </span>
+            )}
+          </div>
+          <p class="text-xs text-gray-600">Updated {formatDate(tool.updated_at)}</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-col items-end gap-2">
           <PricingBadge type={tool.pricing_type} />
           <span class="text-sm font-medium text-gray-400">{pricing}</span>
         </div>
@@ -40,13 +58,13 @@ const answeredFaqs = tool.faq?.filter((f) => f.status === "answered") ?? [];
 
       <!-- Groups -->
       {tool.groups && tool.groups.length > 0 && (
-        <div class="mt-3 flex flex-wrap gap-2">
+        <div class="mt-4 flex flex-wrap gap-2">
           {tool.groups.map((tg) => {
             const g = typeof tg.group_id === "object" ? tg.group_id : null;
             return g ? (
               <a
                 href={`/tools?group=${g.slug}`}
-                class="rounded-full bg-indigo-900/40 px-3 py-1 text-xs font-medium text-indigo-400 hover:bg-indigo-900/70 transition-colors"
+                class="rounded-full border border-gray-700 px-3 py-1 text-xs font-medium text-gray-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors"
               >
                 {g.name}
               </a>
@@ -54,148 +72,214 @@ const answeredFaqs = tool.faq?.filter((f) => f.status === "answered") ?? [];
           })}
         </div>
       )}
-    </div>
 
-    <!-- Overview -->
-    <section class="mb-10 rounded-xl border border-gray-800 bg-gray-900 p-6">
-      <h2 class="mb-3 text-lg font-semibold text-gray-100">Overview</h2>
-      <p class="text-gray-400 leading-relaxed whitespace-pre-line">{tool.overview}</p>
-    </section>
-
-    <!-- Pros & Cons -->
-    {(tool.pros?.length > 0 || tool.cons?.length > 0) && (
-      <section class="mb-10 grid gap-4 sm:grid-cols-2">
-        {tool.pros?.length > 0 && (
-          <div class="rounded-xl border border-green-900 bg-green-950/50 p-5">
-            <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-green-400">Pros</h2>
-            <ul class="space-y-2">
-              {tool.pros.map((pro) => (
-                <li class="flex items-start gap-2 text-sm text-gray-300">
-                  <span class="mt-0.5 text-green-500">✓</span>
-                  {pro}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {tool.cons?.length > 0 && (
-          <div class="rounded-xl border border-red-900 bg-red-950/50 p-5">
-            <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-red-400">Cons</h2>
-            <ul class="space-y-2">
-              {tool.cons.map((con) => (
-                <li class="flex items-start gap-2 text-sm text-gray-300">
-                  <span class="mt-0.5 text-red-500">✗</span>
-                  {con}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
-    )}
-
-    <!-- Reviews -->
-    {tool.reviews && tool.reviews.length > 0 && (
-      <section class="mb-10">
-        <h2 class="mb-4 text-lg font-semibold text-gray-100">Reviews</h2>
-        <div class="space-y-4">
-          {tool.reviews.map((review) => (
-            <blockquote class="rounded-xl border border-gray-800 bg-gray-900 p-5">
-              <p class="text-sm text-gray-400 leading-relaxed">"{review.review_text}"</p>
-              <footer class="mt-3 flex items-center justify-between">
-                <span class="text-xs text-gray-600">{formatDate(review.created_at)}</span>
-                {review.type === "expert" && (
-                  <span class="rounded-full bg-amber-900 px-2 py-0.5 text-xs font-medium text-amber-400">
-                    Expert
-                  </span>
-                )}
-              </footer>
-            </blockquote>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Alternatives -->
-    {tool.alternatives && tool.alternatives.length > 0 && (
-      <section class="mb-10">
-        <h2 class="mb-4 text-lg font-semibold text-gray-100">Alternatives</h2>
-        <div class="flex flex-wrap gap-3">
-          {tool.alternatives.map((alt) => (
-            <a
-              href={alt.alt_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-sm text-gray-300 hover:border-indigo-500 hover:text-indigo-400 transition-colors"
-            >
-              {alt.alt_name} ↗
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Tutorials -->
-    {tool.tutorials && tool.tutorials.length > 0 && (
-      <section class="mb-10">
-        <h2 class="mb-4 text-lg font-semibold text-gray-100">Tutorials</h2>
-        <ul class="space-y-2">
-          {tool.tutorials.map((t) => (
-            <li>
-              <a
-                href={t.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex items-center gap-2 text-sm text-indigo-400 hover:underline"
-              >
-                {t.type === "video_embed" ? "▶" : "📄"} {t.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
-
-    <!-- Awards -->
-    {tool.awards && tool.awards.length > 0 && (
-      <section class="mb-10">
-        <h2 class="mb-4 text-lg font-semibold text-gray-100">Awards</h2>
-        <div class="flex flex-wrap gap-3">
+      <!-- Awards row -->
+      {tool.awards && tool.awards.length > 0 && (
+        <div class="mt-5 flex flex-wrap gap-2">
           {tool.awards.map((ta) => {
             const award = typeof ta.award_id === "object" ? ta.award_id : null;
             return award ? (
-              <div class="flex items-center gap-2 rounded-lg border border-amber-900 bg-amber-950/50 px-4 py-2 text-sm text-amber-400">
-                {award.icon_url && <img src={award.icon_url} alt="" class="h-5 w-5" />}
-                {award.name}
-              </div>
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-800/60 bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-400">
+                {AWARD_ICONS[award.name] ?? "🎖️"} {award.name}
+              </span>
             ) : null;
           })}
         </div>
-      </section>
-    )}
-
-    <!-- FAQ -->
-    {answeredFaqs.length > 0 && (
-      <section class="mb-10">
-        <h2 class="mb-4 text-lg font-semibold text-gray-100">FAQ</h2>
-        <div class="space-y-2">
-          {answeredFaqs.map((faq) => <FaqAccordion faq={faq} />)}
-        </div>
-      </section>
-    )}
-
-    <!-- Related News -->
-    {tool.news && tool.news.length > 0 && (
-      <section class="mb-10">
-        <h2 class="mb-4 text-lg font-semibold text-gray-100">Related News</h2>
-        <div class="grid gap-4 sm:grid-cols-2">
-          {tool.news.slice(0, 4).map((item) => <NewsCard news={item} />)}
-        </div>
-      </section>
-    )}
-
-    <div class="border-t border-gray-800 pt-6 text-center">
-      <a href="/tools" class="text-sm text-indigo-400 hover:underline">← Back to all tools</a>
+      )}
     </div>
   </div>
+
+  <!-- Body: two-column layout -->
+  <div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+
+      <!-- ── Main column (2/3) ────────────────────────────────── -->
+      <div class="lg:col-span-2 space-y-8">
+
+        <!-- Overview -->
+        <section>
+          <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-indigo-500">Overview</h2>
+          <p class="text-gray-300 leading-relaxed">{tool.overview}</p>
+        </section>
+
+        <!-- Pros & Cons -->
+        {(tool.pros?.length > 0 || tool.cons?.length > 0) && (
+          <section>
+            <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-indigo-500">Pros & Cons</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+              {tool.pros?.length > 0 && (
+                <div class="rounded-xl border border-green-900/60 bg-green-950/30 p-5">
+                  <p class="mb-3 text-xs font-bold uppercase tracking-wider text-green-500">Pros</p>
+                  <ul class="space-y-2">
+                    {tool.pros.map((pro) => (
+                      <li class="flex items-start gap-2 text-sm text-gray-300">
+                        <span class="mt-0.5 shrink-0 text-green-500">✓</span>
+                        {pro}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {tool.cons?.length > 0 && (
+                <div class="rounded-xl border border-red-900/60 bg-red-950/30 p-5">
+                  <p class="mb-3 text-xs font-bold uppercase tracking-wider text-red-500">Cons</p>
+                  <ul class="space-y-2">
+                    {tool.cons.map((con) => (
+                      <li class="flex items-start gap-2 text-sm text-gray-300">
+                        <span class="mt-0.5 shrink-0 text-red-500">✗</span>
+                        {con}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        <!-- Reviews -->
+        {tool.reviews && tool.reviews.length > 0 && (
+          <section>
+            <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-indigo-500">
+              Reviews <span class="ml-1 rounded-full bg-gray-800 px-2 py-0.5 text-xs font-normal text-gray-400">{tool.reviews.length}</span>
+            </h2>
+            <div class="space-y-3">
+              {tool.reviews.map((review) => (
+                <blockquote class="relative rounded-xl border border-gray-800 bg-gray-900/60 p-5 pl-6">
+                  <span class="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-indigo-700"></span>
+                  <p class="text-sm text-gray-300 leading-relaxed">"{review.review_text}"</p>
+                  <footer class="mt-3 flex items-center justify-between">
+                    <span class="text-xs text-gray-600">{formatDate(review.created_at)}</span>
+                    {review.type === "expert" ? (
+                      <span class="rounded-full bg-amber-900/50 px-2.5 py-0.5 text-xs font-semibold text-amber-400 ring-1 ring-amber-800">
+                        ★ Expert
+                      </span>
+                    ) : (
+                      <span class="rounded-full bg-gray-800 px-2.5 py-0.5 text-xs text-gray-500">User</span>
+                    )}
+                  </footer>
+                </blockquote>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- FAQ -->
+        {answeredFaqs.length > 0 && (
+          <section>
+            <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-indigo-500">FAQ</h2>
+            <div class="space-y-2">
+              {answeredFaqs.map((faq) => <FaqAccordion faq={faq} />)}
+            </div>
+          </section>
+        )}
+
+        <!-- Related News -->
+        {tool.news && tool.news.length > 0 && (
+          <section>
+            <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-indigo-500">Related News</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+              {tool.news.slice(0, 4).map((item) => <NewsCard news={item} />)}
+            </div>
+          </section>
+        )}
+
+      </div>
+
+      <!-- ── Sidebar (1/3) ────────────────────────────────────── -->
+      <aside class="space-y-6">
+
+        <!-- Pricing card -->
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-5">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Pricing</p>
+          <div class="mb-2">
+            <PricingBadge type={tool.pricing_type} />
+          </div>
+          <p class="text-sm text-gray-300">{pricing}</p>
+          {tool.pricing_type === "free" && (
+            <p class="mt-2 text-xs text-green-500">Free to use — no card required</p>
+          )}
+          {tool.pricing_type === "open_source" && (
+            <p class="mt-2 text-xs text-blue-400">Open source — self-hostable</p>
+          )}
+        </div>
+
+        <!-- Alternatives -->
+        {tool.alternatives && tool.alternatives.length > 0 && (
+          <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-5">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Alternatives</p>
+            <ul class="space-y-2">
+              {tool.alternatives.map((alt) => (
+                <li>
+                  <a
+                    href={alt.alt_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2 text-sm text-gray-300 hover:border-indigo-600 hover:text-indigo-400 transition-colors"
+                  >
+                    {alt.alt_name}
+                    <span class="text-gray-600 text-xs">↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <!-- Tutorials -->
+        {tool.tutorials && tool.tutorials.length > 0 && (
+          <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-5">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Tutorials & Docs</p>
+            <ul class="space-y-2">
+              {tool.tutorials.map((t) => (
+                <li>
+                  <a
+                    href={t.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-start gap-2 rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2 text-sm text-gray-300 hover:border-indigo-600 hover:text-indigo-400 transition-colors"
+                  >
+                    <span class="mt-0.5 shrink-0 text-indigo-500">
+                      {t.type === "video_embed" ? "▶" : "📄"}
+                    </span>
+                    {t.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <!-- Awards -->
+        {tool.awards && tool.awards.length > 0 && (
+          <div class="rounded-xl border border-amber-900/40 bg-amber-950/20 p-5">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-600">Awards</p>
+            <ul class="space-y-2">
+              {tool.awards.map((ta) => {
+                const award = typeof ta.award_id === "object" ? ta.award_id : null;
+                return award ? (
+                  <li class="flex items-start gap-2">
+                    <span class="text-lg leading-none">{AWARD_ICONS[award.name] ?? "🎖️"}</span>
+                    <div>
+                      <p class="text-sm font-medium text-amber-400">{award.name}</p>
+                      {award.description && (
+                        <p class="text-xs text-gray-600 leading-snug">{award.description}</p>
+                      )}
+                    </div>
+                  </li>
+                ) : null;
+              })}
+            </ul>
+          </div>
+        )}
+
+        <!-- Back link -->
+        <a href="/tools" class="block text-center text-xs text-gray-600 hover:text-indigo-400 transition-colors">
+          ← Back to all tools
+        </a>
+
+      </aside>
+    </div>
+  </div>
+
 </BaseLayout>
