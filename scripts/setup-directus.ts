@@ -60,6 +60,8 @@ const COLLECTIONS: CollectionDef[] = [
         defaultValue: "free",
         options: { choices: pricingChoices() },
       }),
+      string("website_url"),
+      string("logo_url"),
       json("pros"),
       json("cons"),
       boolean("is_featured", { defaultValue: false }),

@@ -75,6 +75,8 @@ export async function fetchTools(
           "name",
           "slug",
           "overview",
+          "website_url",
+          "logo_url",
           "pricing_type",
           "pricing_min",
           "pricing_max",
@@ -135,6 +137,7 @@ export async function fetchToolBySlug(slug: string): Promise<Tool | null> {
       limit: 1,
       fields: [
         "id", "name", "slug", "overview",
+        "website_url", "logo_url",
         "pricing_type", "pricing_min", "pricing_max", "pricing_label",
         "pros", "cons", "is_featured", "status", "created_at", "updated_at",
       ],

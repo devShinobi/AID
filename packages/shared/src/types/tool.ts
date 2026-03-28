@@ -11,6 +11,8 @@ export interface Tool {
   pricing_type: PricingType;
   pros: string[];
   cons: string[];
+  website_url: string | null;
+  logo_url: string | null;
   is_featured: boolean;
   status: "published" | "draft";
   created_at: string;
