@@ -202,6 +202,30 @@ async function main() {
         source_type: "manual",
         published_at: "2024-10-22T12:00:00Z",
       },
+      {
+        tool_id: toolBySlug["github-copilot"],
+        title: "GitHub Copilot gets multi-file editing and agent mode",
+        content: "GitHub has expanded Copilot with agent mode, enabling it to autonomously edit multiple files, run tests, and fix errors in a loop. The feature is rolling out in VS Code and JetBrains IDEs.",
+        source_name: "GitHub Blog",
+        source_type: "manual",
+        published_at: "2025-02-06T10:00:00Z",
+      },
+      {
+        tool_id: toolBySlug["stable-diffusion"],
+        title: "Stability AI releases Stable Diffusion 3.5 with improved prompt adherence",
+        content: "Stability AI has launched Stable Diffusion 3.5, a major update featuring improved prompt adherence, better text rendering, and a new Large Turbo variant that runs significantly faster for real-time workflows.",
+        source_name: "Stability AI Blog",
+        source_type: "manual",
+        published_at: "2024-10-29T09:00:00Z",
+      },
+      {
+        tool_id: toolBySlug["notion-ai"],
+        title: "Notion AI adds Q&A across your entire workspace",
+        content: "Notion AI's new Q&A feature lets users ask natural language questions and receive answers synthesised from across their entire workspace, including databases, docs, and meeting notes.",
+        source_name: "Notion Blog",
+        source_type: "manual",
+        published_at: "2024-01-18T08:00:00Z",
+      },
     ];
 
     for (const item of newsItems) {
@@ -226,9 +250,13 @@ async function main() {
       { tool_id: toolBySlug["claude"], review_text: "Claude's ability to handle 200k-token contexts is a game changer for long document analysis. Summaries are remarkably accurate.", type: "normal" },
       { tool_id: toolBySlug["claude"], review_text: "Anthropic's constitutional AI approach shows — Claude is noticeably more careful and nuanced in its responses compared to competitors.", type: "expert" },
       { tool_id: toolBySlug["midjourney"], review_text: "The artistic quality from Midjourney is simply stunning. No other tool comes close for generating illustrations and concept art.", type: "normal" },
+      { tool_id: toolBySlug["midjourney"], review_text: "Midjourney's style consistency across prompts has improved dramatically in v6. You can now maintain character likeness reliably across a whole series.", type: "expert" },
       { tool_id: toolBySlug["github-copilot"], review_text: "Copilot has genuinely made me faster. It autocompletes whole functions correctly and picks up on project-specific patterns quickly.", type: "normal" },
+      { tool_id: toolBySlug["github-copilot"], review_text: "The new agent mode is a step change — Copilot can now iterate across files, run tests, and fix failures autonomously. It's closer to a junior dev than an autocomplete.", type: "expert" },
       { tool_id: toolBySlug["stable-diffusion"], review_text: "Running locally means no censorship and no subscription — with the right model and ControlNet setup, the results rival Midjourney.", type: "expert" },
+      { tool_id: toolBySlug["stable-diffusion"], review_text: "The open-source ecosystem around SD is incredible — LoRA fine-tunes, embeddings, ControlNet adapters. Once you learn the tooling the creative control is unmatched.", type: "normal" },
       { tool_id: toolBySlug["notion-ai"], review_text: "Notion AI fits seamlessly into my existing workflow. The meeting notes summarisation alone saves me an hour a week.", type: "normal" },
+      { tool_id: toolBySlug["notion-ai"], review_text: "The Q&A feature across the whole workspace is genuinely useful — it surfaces relevant notes from months ago that I would never have found manually.", type: "expert" },
     ];
     for (const r of reviews) {
       if (!r.tool_id) continue;
@@ -277,10 +305,13 @@ async function main() {
       { tool_id: toolBySlug["claude"], title: "Claude Prompt Library", url: "https://docs.anthropic.com/en/prompt-library/library", type: "link" },
       { tool_id: toolBySlug["claude"], title: "Anthropic Claude API Quickstart", url: "https://docs.anthropic.com/en/docs/quickstart", type: "link" },
       { tool_id: toolBySlug["midjourney"], title: "Midjourney Quick Start Guide", url: "https://docs.midjourney.com/docs/quick-start", type: "link" },
+      { tool_id: toolBySlug["midjourney"], title: "Midjourney Prompt Reference", url: "https://docs.midjourney.com/docs/prompts-2", type: "link" },
       { tool_id: toolBySlug["stable-diffusion"], title: "Stable Diffusion Web UI Installation Guide", url: "https://github.com/AUTOMATIC1111/stable-diffusion-webui#installation-and-running", type: "link" },
       { tool_id: toolBySlug["stable-diffusion"], title: "Beginner's Guide to Stable Diffusion", url: "https://stable-diffusion-art.com/beginners-guide/", type: "link" },
       { tool_id: toolBySlug["github-copilot"], title: "Getting Started with GitHub Copilot", url: "https://docs.github.com/en/copilot/using-github-copilot/getting-started-with-github-copilot", type: "link" },
+      { tool_id: toolBySlug["github-copilot"], title: "GitHub Copilot Best Practices", url: "https://docs.github.com/en/copilot/using-github-copilot/best-practices-for-using-github-copilot", type: "link" },
       { tool_id: toolBySlug["notion-ai"], title: "Using Notion AI — Official Guide", url: "https://www.notion.so/help/guides/notion-ai-for-docs", type: "link" },
+      { tool_id: toolBySlug["notion-ai"], title: "Notion AI Q&A Walkthrough", url: "https://www.notion.so/help/notion-ai-for-q-and-a", type: "link" },
     ];
     for (const t of tutorials) {
       if (!t.tool_id) continue;
@@ -300,9 +331,13 @@ async function main() {
       { tool_id: toolBySlug["claude"], question: "What makes Claude different from ChatGPT?", answer: "Claude has a significantly larger context window (up to 200k tokens), tends to be more careful about accuracy, and is often preferred for long document analysis and nuanced writing tasks.", status: "answered" },
       { tool_id: toolBySlug["claude"], question: "Does Claude have an API?", answer: "Yes, Anthropic offers the Claude API through their platform at console.anthropic.com. It supports Claude 3.5 Sonnet and Haiku models.", status: "answered" },
       { tool_id: toolBySlug["midjourney"], question: "Do I need a Discord account to use Midjourney?", answer: "Midjourney now has a web interface at midjourney.com, so Discord is no longer required. However, the community Discord remains active.", status: "answered" },
+      { tool_id: toolBySlug["midjourney"], question: "Can I use Midjourney images commercially?", answer: "Yes, paid subscribers can use Midjourney images commercially. Free trial users cannot. Check the current subscription plan details on midjourney.com for the latest licensing terms.", status: "answered" },
       { tool_id: toolBySlug["stable-diffusion"], question: "Do I need a powerful GPU to run Stable Diffusion?", answer: "A GPU with at least 4GB VRAM is recommended for comfortable use. It can run on CPU, but will be very slow. Cloud-based options like Google Colab are available for users without powerful hardware.", status: "answered" },
+      { tool_id: toolBySlug["stable-diffusion"], question: "What is the best UI for Stable Diffusion?", answer: "The most popular UIs are AUTOMATIC1111's stable-diffusion-webui and ComfyUI. AUTOMATIC1111 is easier for beginners; ComfyUI offers node-based workflows and is preferred for complex pipelines.", status: "answered" },
       { tool_id: toolBySlug["github-copilot"], question: "Is GitHub Copilot free?", answer: "GitHub Copilot is free for verified students and maintainers of popular open source projects. For others, it is $10/month or $100/year.", status: "answered" },
+      { tool_id: toolBySlug["github-copilot"], question: "Which editors does GitHub Copilot support?", answer: "GitHub Copilot supports VS Code, Visual Studio, JetBrains IDEs (IntelliJ, PyCharm, WebStorm, etc.), Neovim, and Azure Data Studio, among others.", status: "answered" },
       { tool_id: toolBySlug["notion-ai"], question: "Is Notion AI included in my Notion subscription?", answer: "No — Notion AI is an add-on that costs $8/member/month (billed annually) on top of any Notion plan, including the free plan.", status: "answered" },
+      { tool_id: toolBySlug["notion-ai"], question: "What can Notion AI do that regular Notion cannot?", answer: "Notion AI adds generative writing, text summarisation, translation, action item extraction, tone adjustment, and the Q&A feature that answers questions from across your whole workspace.", status: "answered" },
     ];
     for (const f of faqs) {
       if (!f.tool_id) continue;
