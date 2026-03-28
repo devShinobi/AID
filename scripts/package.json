@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "setup-directus": "tsx setup-directus.ts",
-    "seed": "tsx seed.ts"
+    "seed": "tsx seed.ts",
+    "patch-m2o": "tsx patch-m2o-fields.ts"
   },
   "dependencies": {
     "@directus/sdk": "^18.0.0"

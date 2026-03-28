@@ -25,7 +25,7 @@ import {
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL ?? "http://localhost:8055";
-const ADMIN_EMAIL = process.env.DIRECTUS_ADMIN_EMAIL ?? "admin@aid.local";
+const ADMIN_EMAIL = process.env.DIRECTUS_ADMIN_EMAIL ?? "admin@example.com";
 const ADMIN_PASSWORD = process.env.DIRECTUS_ADMIN_PASSWORD ?? "admin123";
 
 // ─── Schema definition ────────────────────────────────────────────────────────
@@ -75,8 +75,8 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "tool_groups",
     fields: [
-      uuid("tool_id", { required: true }),
-      uuid("group_id", { required: true }),
+      m2o("tool_id", "tools", { required: true }),
+      m2o("group_id", "groups", { required: true }),
     ],
   },
 
@@ -84,7 +84,7 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "reviews",
     fields: [
-      uuid("tool_id", { required: true }),
+      m2o("tool_id", "tools", { required: true }),
       text("review_text", { required: true }),
       string("user_id"),
       string("type", {
@@ -98,8 +98,8 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "alternatives",
     fields: [
-      uuid("tool_id", { required: true }),
-      uuid("alt_tool_id"),
+      m2o("tool_id", "tools", { required: true }),
+      m2o("alt_tool_id", "tools"),
       string("alt_name", { required: true }),
       string("alt_url", { required: true }),
     ],
@@ -120,8 +120,8 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "tool_awards",
     fields: [
-      uuid("tool_id", { required: true }),
-      uuid("award_id", { required: true }),
+      m2o("tool_id", "tools", { required: true }),
+      m2o("award_id", "awards", { required: true }),
       timestamp("awarded_at"),
     ],
   },
@@ -130,7 +130,7 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "tutorials",
     fields: [
-      uuid("tool_id", { required: true }),
+      m2o("tool_id", "tools", { required: true }),
       string("title", { required: true }),
       string("url", { required: true }),
       string("type", {
@@ -144,7 +144,7 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "news",
     fields: [
-      uuid("tool_id", { required: true }),
+      m2o("tool_id", "tools", { required: true }),
       string("title"),
       text("content", { required: true }),
       string("source_url"),
@@ -161,7 +161,7 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "faq",
     fields: [
-      uuid("tool_id", { required: true }),
+      m2o("tool_id", "tools", { required: true }),
       text("question", { required: true }),
       text("answer"),
       string("status", {
@@ -206,7 +206,7 @@ const COLLECTIONS: CollectionDef[] = [
   {
     name: "comments",
     fields: [
-      uuid("tool_id", { required: true }),
+      m2o("tool_id", "tools", { required: true }),
       string("author_name", { required: true }),
       string("author_email"),
       text("content", { required: true }),
@@ -403,6 +403,30 @@ function boolean(field: string, opts: FieldOptions = {}): Record<string, unknown
 
 function uuid(field: string, opts: FieldOptions = {}): Record<string, unknown> {
   return fieldDef(field, "uuid", "uuid", opts);
+}
+
+function m2o(
+  field: string,
+  relatedCollection: string,
+  opts: FieldOptions = {}
+): Record<string, unknown> {
+  return {
+    field,
+    type: "uuid",
+    schema: {
+      data_type: "uuid",
+      is_nullable: !opts.required,
+      default_value: null,
+    },
+    meta: {
+      required: opts.required ?? false,
+      interface: "select-dropdown-m2o",
+      display: "related-values",
+      display_options: { template: "{{name}}" },
+      special: ["m2o"],
+      note: `Related ${relatedCollection} record`,
+    },
+  };
 }
 
 function json(field: string, opts: FieldOptions = {}): Record<string, unknown> {
