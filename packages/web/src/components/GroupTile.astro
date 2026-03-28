@@ -25,16 +25,16 @@ const borderColor = isActive ? color.hex : color.border;
 
 <a
   href={`/?group=${group.slug}`}
-  class="group relative flex flex-col items-center justify-between rounded-xl p-3 transition-all duration-200 hover:scale-105 hover:shadow-xl"
+  class="group relative flex flex-col items-center justify-between rounded-lg p-2 transition-all duration-200 hover:scale-105 hover:shadow-xl"
   style={`background: ${color.bg}; border: 1.5px solid ${borderColor};`}
   title={group.function}
 >
   <!-- Top row: index + flame -->
   <div class="flex w-full items-center justify-between">
-    <span class="font-mono text-[11px] text-gray-500">{index}</span>
+    <span class="font-mono text-[9px] text-gray-500">{index}</span>
     {
       (group.toolCount ?? 0) >= 2 && (
-        <span class="text-[11px]" title={`${group.toolCount} tools`}>
+        <span class="text-[9px]" title={`${group.toolCount} tools`}>
           🔥
         </span>
       )
@@ -43,14 +43,14 @@ const borderColor = isActive ? color.hex : color.border;
 
   <!-- Abbreviation -->
   <span
-    class="my-1 font-mono text-4xl font-bold tracking-tight transition-all group-hover:scale-110"
+    class="my-1 font-mono text-2xl font-bold tracking-tight transition-all group-hover:scale-110"
     style={`color: ${color.hex};`}
   >
     {abbr(group.name)}
   </span>
 
   <!-- Group name -->
-  <span class="text-center text-[9px] font-semibold uppercase leading-tight tracking-widest text-gray-400">
+  <span class="text-center text-[8px] font-semibold uppercase leading-tight tracking-widest text-gray-400">
     {group.name}
   </span>
 

@@ -81,10 +81,10 @@ const sectionTitle = activeGroup ? activeGroup.name : "Featured Tools";
 
     <!-- ── Periodic table of groups ─────────────────────────────────────────── -->
     <div class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap justify-center gap-4">
+      <div class="flex flex-wrap justify-center gap-2">
         {
           groups.map((g, i) => (
-            <div class="w-28 sm:w-32">
+            <div class="w-20 sm:w-24">
               <GroupTile
                 group={g}
                 color={colorFor(g.slug, i)}
