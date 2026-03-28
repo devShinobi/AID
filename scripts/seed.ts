@@ -211,6 +211,106 @@ async function main() {
     }
   }
 
+  // ── Shared tool lookup ───────────────────────────────────────────────────────
+  const allTools: any[] = await client.request(readItems("tools" as any, { limit: -1, fields: ["id", "slug"] }));
+  const toolBySlug = Object.fromEntries(allTools.map((t: any) => [t.slug, t.id]));
+
+  // ── Reviews ──────────────────────────────────────────────────────────────────
+  const existingReviews: any[] = await client.request(readItems("reviews" as any, { limit: 1 }));
+  if (existingReviews.length > 0) {
+    console.log("⏭️  Reviews already seeded — skipping");
+  } else {
+    const reviews = [
+      { tool_id: toolBySlug["chatgpt"], review_text: "ChatGPT is my go-to for everything from drafting emails to debugging code. The breadth of tasks it handles is unmatched.", type: "normal" },
+      { tool_id: toolBySlug["chatgpt"], review_text: "The GPT-4o model is a significant step forward — multimodal capabilities feel genuinely useful rather than a gimmick.", type: "expert" },
+      { tool_id: toolBySlug["claude"], review_text: "Claude's ability to handle 200k-token contexts is a game changer for long document analysis. Summaries are remarkably accurate.", type: "normal" },
+      { tool_id: toolBySlug["claude"], review_text: "Anthropic's constitutional AI approach shows — Claude is noticeably more careful and nuanced in its responses compared to competitors.", type: "expert" },
+      { tool_id: toolBySlug["midjourney"], review_text: "The artistic quality from Midjourney is simply stunning. No other tool comes close for generating illustrations and concept art.", type: "normal" },
+      { tool_id: toolBySlug["github-copilot"], review_text: "Copilot has genuinely made me faster. It autocompletes whole functions correctly and picks up on project-specific patterns quickly.", type: "normal" },
+      { tool_id: toolBySlug["stable-diffusion"], review_text: "Running locally means no censorship and no subscription — with the right model and ControlNet setup, the results rival Midjourney.", type: "expert" },
+      { tool_id: toolBySlug["notion-ai"], review_text: "Notion AI fits seamlessly into my existing workflow. The meeting notes summarisation alone saves me an hour a week.", type: "normal" },
+    ];
+    for (const r of reviews) {
+      if (!r.tool_id) continue;
+      await client.request(createItem("reviews" as any, r));
+    }
+    console.log(`✅ Created ${reviews.length} reviews`);
+  }
+
+  // ── Alternatives ─────────────────────────────────────────────────────────────
+  const existingAlts: any[] = await client.request(readItems("alternatives" as any, { limit: 1 }));
+  if (existingAlts.length > 0) {
+    console.log("⏭️  Alternatives already seeded — skipping");
+  } else {
+    const alternatives = [
+      { tool_id: toolBySlug["chatgpt"], alt_name: "Claude", alt_url: "https://claude.ai" },
+      { tool_id: toolBySlug["chatgpt"], alt_name: "Gemini", alt_url: "https://gemini.google.com" },
+      { tool_id: toolBySlug["chatgpt"], alt_name: "Mistral", alt_url: "https://mistral.ai" },
+      { tool_id: toolBySlug["claude"], alt_name: "ChatGPT", alt_url: "https://chat.openai.com" },
+      { tool_id: toolBySlug["claude"], alt_name: "Gemini", alt_url: "https://gemini.google.com" },
+      { tool_id: toolBySlug["midjourney"], alt_name: "Stable Diffusion", alt_url: "https://stability.ai" },
+      { tool_id: toolBySlug["midjourney"], alt_name: "DALL-E 3", alt_url: "https://openai.com/dall-e-3" },
+      { tool_id: toolBySlug["midjourney"], alt_name: "Adobe Firefly", alt_url: "https://firefly.adobe.com" },
+      { tool_id: toolBySlug["stable-diffusion"], alt_name: "Midjourney", alt_url: "https://midjourney.com" },
+      { tool_id: toolBySlug["stable-diffusion"], alt_name: "DALL-E 3", alt_url: "https://openai.com/dall-e-3" },
+      { tool_id: toolBySlug["github-copilot"], alt_name: "Cursor", alt_url: "https://cursor.sh" },
+      { tool_id: toolBySlug["github-copilot"], alt_name: "Tabnine", alt_url: "https://www.tabnine.com" },
+      { tool_id: toolBySlug["github-copilot"], alt_name: "Codeium", alt_url: "https://codeium.com" },
+      { tool_id: toolBySlug["notion-ai"], alt_name: "Coda AI", alt_url: "https://coda.io" },
+      { tool_id: toolBySlug["notion-ai"], alt_name: "Mem", alt_url: "https://mem.ai" },
+    ];
+    for (const a of alternatives) {
+      if (!a.tool_id) continue;
+      await client.request(createItem("alternatives" as any, a));
+    }
+    console.log(`✅ Created ${alternatives.length} alternatives`);
+  }
+
+  // ── Tutorials ────────────────────────────────────────────────────────────────
+  const existingTutorials: any[] = await client.request(readItems("tutorials" as any, { limit: 1 }));
+  if (existingTutorials.length > 0) {
+    console.log("⏭️  Tutorials already seeded — skipping");
+  } else {
+    const tutorials = [
+      { tool_id: toolBySlug["chatgpt"], title: "ChatGPT Prompt Engineering Guide", url: "https://platform.openai.com/docs/guides/prompt-engineering", type: "link" },
+      { tool_id: toolBySlug["chatgpt"], title: "Getting Started with ChatGPT API", url: "https://platform.openai.com/docs/quickstart", type: "link" },
+      { tool_id: toolBySlug["claude"], title: "Claude Prompt Library", url: "https://docs.anthropic.com/en/prompt-library/library", type: "link" },
+      { tool_id: toolBySlug["claude"], title: "Anthropic Claude API Quickstart", url: "https://docs.anthropic.com/en/docs/quickstart", type: "link" },
+      { tool_id: toolBySlug["midjourney"], title: "Midjourney Quick Start Guide", url: "https://docs.midjourney.com/docs/quick-start", type: "link" },
+      { tool_id: toolBySlug["stable-diffusion"], title: "Stable Diffusion Web UI Installation Guide", url: "https://github.com/AUTOMATIC1111/stable-diffusion-webui#installation-and-running", type: "link" },
+      { tool_id: toolBySlug["stable-diffusion"], title: "Beginner's Guide to Stable Diffusion", url: "https://stable-diffusion-art.com/beginners-guide/", type: "link" },
+      { tool_id: toolBySlug["github-copilot"], title: "Getting Started with GitHub Copilot", url: "https://docs.github.com/en/copilot/using-github-copilot/getting-started-with-github-copilot", type: "link" },
+      { tool_id: toolBySlug["notion-ai"], title: "Using Notion AI — Official Guide", url: "https://www.notion.so/help/guides/notion-ai-for-docs", type: "link" },
+    ];
+    for (const t of tutorials) {
+      if (!t.tool_id) continue;
+      await client.request(createItem("tutorials" as any, t));
+    }
+    console.log(`✅ Created ${tutorials.length} tutorials`);
+  }
+
+  // ── FAQ ──────────────────────────────────────────────────────────────────────
+  const existingFaq: any[] = await client.request(readItems("faq" as any, { limit: 1 }));
+  if (existingFaq.length > 0) {
+    console.log("⏭️  FAQ already seeded — skipping");
+  } else {
+    const faqs = [
+      { tool_id: toolBySlug["chatgpt"], question: "Is ChatGPT free to use?", answer: "Yes — ChatGPT has a free tier powered by GPT-4o mini. ChatGPT Plus ($20/mo) gives access to GPT-4o, Advanced Data Analysis, image generation, and higher limits.", status: "answered" },
+      { tool_id: toolBySlug["chatgpt"], question: "Can ChatGPT browse the internet?", answer: "Yes, ChatGPT Plus and Team plans have web browsing capability. The free tier does not have real-time internet access.", status: "answered" },
+      { tool_id: toolBySlug["claude"], question: "What makes Claude different from ChatGPT?", answer: "Claude has a significantly larger context window (up to 200k tokens), tends to be more careful about accuracy, and is often preferred for long document analysis and nuanced writing tasks.", status: "answered" },
+      { tool_id: toolBySlug["claude"], question: "Does Claude have an API?", answer: "Yes, Anthropic offers the Claude API through their platform at console.anthropic.com. It supports Claude 3.5 Sonnet and Haiku models.", status: "answered" },
+      { tool_id: toolBySlug["midjourney"], question: "Do I need a Discord account to use Midjourney?", answer: "Midjourney now has a web interface at midjourney.com, so Discord is no longer required. However, the community Discord remains active.", status: "answered" },
+      { tool_id: toolBySlug["stable-diffusion"], question: "Do I need a powerful GPU to run Stable Diffusion?", answer: "A GPU with at least 4GB VRAM is recommended for comfortable use. It can run on CPU, but will be very slow. Cloud-based options like Google Colab are available for users without powerful hardware.", status: "answered" },
+      { tool_id: toolBySlug["github-copilot"], question: "Is GitHub Copilot free?", answer: "GitHub Copilot is free for verified students and maintainers of popular open source projects. For others, it is $10/month or $100/year.", status: "answered" },
+      { tool_id: toolBySlug["notion-ai"], question: "Is Notion AI included in my Notion subscription?", answer: "No — Notion AI is an add-on that costs $8/member/month (billed annually) on top of any Notion plan, including the free plan.", status: "answered" },
+    ];
+    for (const f of faqs) {
+      if (!f.tool_id) continue;
+      await client.request(createItem("faq" as any, f));
+    }
+    console.log(`✅ Created ${faqs.length} FAQs`);
+  }
+
   console.log("\n🎉 Seeding complete!");
   console.log(`\nVisit ${DIRECTUS_URL.replace("8055", "4321")} to see your site.\n`);
 }

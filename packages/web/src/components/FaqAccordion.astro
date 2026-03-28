@@ -6,17 +6,15 @@ interface Props {
 }
 
 const { faq } = Astro.props;
-const id = `faq-${faq.id}`;
 ---
 
-<details class="group rounded-lg border border-gray-200 bg-white" name="faq">
+<details class="group rounded-lg border border-gray-800 bg-gray-900" name="faq">
   <summary
-    class="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+    class="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-medium text-gray-200 hover:bg-gray-800 transition-colors"
   >
     <span>{faq.question}</span>
-    <!-- Chevron rotates when open -->
     <svg
-      class="h-4 w-4 shrink-0 text-gray-400 transition-transform group-open:rotate-180"
+      class="h-4 w-4 shrink-0 text-gray-500 transition-transform group-open:rotate-180"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -29,7 +27,7 @@ const id = `faq-${faq.id}`;
 
   {
     faq.answer && (
-      <div class="border-t border-gray-100 px-5 py-4 text-sm text-gray-600 leading-relaxed">
+      <div class="border-t border-gray-800 px-5 py-4 text-sm text-gray-400 leading-relaxed">
         {faq.answer}
       </div>
     )

@@ -11,17 +11,17 @@ const currentPath = Astro.url.pathname;
 const currentQuery = Astro.url.searchParams.get("q") ?? "";
 ---
 
-<header class="border-b border-gray-200 bg-white shadow-sm">
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+<header class="border-b border-gray-800 bg-gray-950 shadow-sm">
+  <div class="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
     <!-- Logo / Site name -->
-    <a href="/" class="flex shrink-0 items-center gap-2 text-indigo-600 hover:text-indigo-700">
+    <a href="/" class="flex shrink-0 items-center gap-2 text-indigo-400 hover:text-indigo-300">
       <img src="/favicon.svg" alt="AID logo" width="28" height="28" />
       <span class="text-xl font-bold tracking-tight">AID</span>
-      <span class="hidden text-sm text-gray-400 sm:inline">AI Directory</span>
+      <span class="hidden text-sm text-gray-500 sm:inline">AI Directory</span>
     </a>
 
     <!-- Search bar (React island) -->
-    <div class="flex-1 max-w-xs">
+    <div class="flex-1">
       <SearchBar initialQuery={currentQuery} client:visible />
     </div>
 
@@ -34,8 +34,8 @@ const currentQuery = Astro.url.searchParams.get("q") ?? "";
             class:list={[
               "hidden rounded-md px-3 py-2 text-sm font-medium transition-colors md:block",
               currentPath.startsWith(href)
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                ? "bg-indigo-900/50 text-indigo-400"
+                : "text-gray-400 hover:bg-gray-800 hover:text-gray-100",
             ]}
           >
             {label}
@@ -44,7 +44,7 @@ const currentQuery = Astro.url.searchParams.get("q") ?? "";
       }
       <a
         href="/submit"
-        class="ml-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+        class="ml-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors"
       >
         Submit
       </a>

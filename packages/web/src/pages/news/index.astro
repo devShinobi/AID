@@ -13,7 +13,7 @@ const meta = buildPaginationMeta(page, DEFAULT_PAGE_SIZE, total);
 <BaseLayout title="AI News" description="Latest news and updates from the AI tools world.">
   <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     <div class="mb-8 flex items-center justify-between">
-      <h1 class="text-3xl font-bold text-gray-900">AI News</h1>
+      <h1 class="text-3xl font-bold text-gray-100">AI News</h1>
       <span class="text-sm text-gray-500">{total} article{total !== 1 ? "s" : ""}</span>
     </div>
 
@@ -25,7 +25,7 @@ const meta = buildPaginationMeta(page, DEFAULT_PAGE_SIZE, total);
         <Pagination meta={meta} baseUrl="/news" />
       </>
     ) : (
-      <div class="rounded-xl border border-dashed border-gray-300 py-20 text-center text-gray-400">
+      <div class="rounded-xl border border-dashed border-gray-700 py-20 text-center text-gray-600">
         <p class="text-lg font-medium">No news yet</p>
         <p class="mt-1 text-sm">Check back soon.</p>
       </div>

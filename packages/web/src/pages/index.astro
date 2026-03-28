@@ -1,90 +1,134 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ToolCard from "@/components/ToolCard.astro";
-import NewsCard from "@/components/NewsCard.astro";
-import { fetchFeaturedTools } from "@/lib/queries/tools";
-import { fetchLatestNews } from "@/lib/queries/news";
+import GroupTile from "@/components/GroupTile.astro";
+import { fetchFeaturedTools, fetchTools } from "@/lib/queries/tools";
+import { fetchGroupsWithCounts } from "@/lib/queries/groups";
 
-const [featuredTools, latestNews] = await Promise.all([
-  fetchFeaturedTools(6),
-  fetchLatestNews(3),
+// ── Colour palette assigned per group slug ──────────────────────────────────
+const PALETTE: Record<string, { hex: string; bg: string; border: string }> = {
+  writing:            { hex: "#818cf8", bg: "#0f0e24", border: "#3730a3" },
+  "image-generation": { hex: "#f472b6", bg: "#1f0616", border: "#9d174d" },
+  code:               { hex: "#4ade80", bg: "#071a0d", border: "#166534" },
+  productivity:       { hex: "#facc15", bg: "#1a1200", border: "#854d0e" },
+  "chat-assistants":  { hex: "#22d3ee", bg: "#071820", border: "#0e7490" },
+};
+const FALLBACK = [
+  { hex: "#fb923c", bg: "#1a0a00", border: "#9a3412" },
+  { hex: "#a78bfa", bg: "#180d2e", border: "#6d28d9" },
+  { hex: "#34d399", bg: "#071a12", border: "#065f46" },
+  { hex: "#f87171", bg: "#1a0707", border: "#991b1b" },
+];
+function colorFor(slug: string, idx: number) {
+  return PALETTE[slug] ?? FALLBACK[idx % FALLBACK.length];
+}
+
+// ── URL param for group filter ───────────────────────────────────────────────
+const selectedGroup = Astro.url.searchParams.get("group") ?? null;
+
+// ── Data fetching ────────────────────────────────────────────────────────────
+const [groups, tools] = await Promise.all([
+  fetchGroupsWithCounts(),
+  selectedGroup
+    ? fetchTools({ groupSlug: selectedGroup, limit: 12 }).then((r) => r.tools)
+    : fetchFeaturedTools(6),
 ]);
+
+const activeGroup = groups.find((g) => g.slug === selectedGroup) ?? null;
+const sectionTitle = activeGroup ? activeGroup.name : "Featured Tools";
 ---
 
-<BaseLayout title="Home" description="Discover and explore the best AI tools.">
-  <!-- Hero -->
-  <section class="bg-gradient-to-b from-indigo-50 to-white py-20">
-    <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-      <h1 class="text-5xl font-bold tracking-tight text-gray-900">
-        Discover the best <span class="text-indigo-600">AI tools</span>
+<BaseLayout
+  title="The Visual Map of AI"
+  description="Discover, compare, and explore the AI ecosystem. Browse by capability group."
+>
+  <!-- ── Hero (dark) ──────────────────────────────────────────────────────── -->
+  <section style="background: #080b10;">
+    <div class="mx-auto max-w-4xl px-4 pb-12 pt-16 text-center sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+        The Visual Map of{" "}
+        <span style="color: #3b82f6;">Intelligence.</span>
       </h1>
-      <p class="mt-4 text-xl text-gray-500">
-        Browse, compare, and find the right AI tool for your workflow.
+      <p class="mx-auto mt-5 max-w-2xl text-base text-gray-400 sm:text-lg">
+        Discover, compare, and understand the AI ecosystem. Explore by capability
+        group and find the right tool for your workflow.
       </p>
-      <div class="mt-8 flex justify-center gap-4">
+    </div>
+
+    <!-- ── Group filter tabs ────────────────────────────────────────────────── -->
+    <div class="mx-auto max-w-7xl overflow-x-auto px-4 pb-8 sm:px-6 lg:px-8">
+      <div class="flex min-w-max items-center justify-center gap-2">
         <a
-          href="/tools"
-          class="rounded-md bg-indigo-600 px-6 py-3 text-base font-medium text-white hover:bg-indigo-700 transition-colors"
-        >
-          Browse All Tools
-        </a>
-        <a
-          href="/submit"
-          class="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          Submit a Tool
-        </a>
+          href="/"
+          class="rounded-full border px-4 py-1.5 text-sm font-semibold leading-none transition-colors"
+          style={selectedGroup === null
+            ? "background: #fff; color: #000; border-color: #fff;"
+            : "background: transparent; color: #9ca3af; border-color: #374151;"}
+        >ALL</a>
+        {
+          groups.map((g) => (
+            <a
+              href={`/?group=${g.slug}`}
+              class="whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-semibold leading-none transition-colors"
+              style={selectedGroup === g.slug
+                ? "background: #fff; color: #000; border-color: #fff;"
+                : "background: transparent; color: #9ca3af; border-color: #374151;"}
+            >{g.name.toUpperCase()}</a>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- ── Periodic table of groups ─────────────────────────────────────────── -->
+    <div class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap justify-center gap-4">
+        {
+          groups.map((g, i) => (
+            <div class="w-28 sm:w-32">
+              <GroupTile
+                group={g}
+                color={colorFor(g.slug, i)}
+                index={i + 1}
+                isActive={g.slug === selectedGroup}
+              />
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
 
-  <!-- Featured Tools -->
-  {
-    featuredTools.length > 0 && (
-      <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-gray-900">Featured Tools</h2>
-          <a href="/tools" class="text-sm font-medium text-indigo-600 hover:underline">
-            View all →
-          </a>
-        </div>
-        <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredTools.map((tool) => (
-            <ToolCard tool={tool} />
-          ))}
-        </div>
-      </section>
-    )
-  }
+  <!-- ── Tools section ───────────────────────────────────────────────────────── -->
+  <section style="background: #0f1117;" class="py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-gray-100">{sectionTitle}</h2>
+        <a href="/tools" class="text-sm font-medium text-indigo-400 hover:underline">
+          Browse all →
+        </a>
+      </div>
 
-  <!-- Latest News -->
-  {
-    latestNews.length > 0 && (
-      <section class="bg-gray-50 py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold text-gray-900">Latest News</h2>
-            <a href="/news" class="text-sm font-medium text-indigo-600 hover:underline">
-              View all →
-            </a>
-          </div>
+      {
+        tools.length > 0 ? (
           <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {latestNews.map((item) => (
-              <NewsCard news={item} />
+            {tools.map((tool) => (
+              <ToolCard tool={tool} />
             ))}
           </div>
-        </div>
-      </section>
-    )
-  }
+        ) : (
+          <p class="mt-8 text-center text-gray-600">No tools found in this group yet.</p>
+        )
+      }
+    </div>
+  </section>
 
-  <!-- CTA -->
-  <section class="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
-    <h2 class="text-2xl font-bold text-gray-900">Know a great AI tool?</h2>
+  <!-- ── CTA ─────────────────────────────────────────────────────────────────── -->
+  <section style="background: #080b10;" class="px-4 py-16 text-center sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-bold text-gray-100">Know a great AI tool?</h2>
     <p class="mt-2 text-gray-500">Help the community by submitting it to AID.</p>
     <a
       href="/submit"
-      class="mt-6 inline-block rounded-md bg-indigo-600 px-6 py-3 text-base font-medium text-white hover:bg-indigo-700 transition-colors"
+      class="mt-6 inline-block rounded-md bg-indigo-600 px-6 py-3 text-base font-medium text-white hover:bg-indigo-500 transition-colors"
     >
       Submit a Tool
     </a>

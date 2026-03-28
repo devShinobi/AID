@@ -17,6 +17,34 @@ export interface FetchToolsResult {
   total: number;
 }
 
+/** Resolve a group slug → list of tool IDs via the junction table.
+ *  This avoids the M2M relation filter which requires elevated Directus permissions. */
+async function resolveToolIdsForGroup(
+  client: ReturnType<typeof import("@directus/sdk").createDirectus>,
+  groupSlug: string
+): Promise<string[] | null> {
+  const groups = await client.request(
+    readItems("groups" as any, {
+      filter: { slug: { _eq: groupSlug } },
+      fields: ["id"],
+      limit: 1,
+    })
+  );
+  const groupId = (groups as any[])[0]?.id;
+  if (!groupId) return null;
+
+  const junctions = await client.request(
+    readItems("tool_groups" as any, {
+      filter: { group_id: { _eq: groupId } },
+      fields: ["tool_id"],
+      limit: -1,
+    })
+  );
+  return (junctions as any[]).map((j) =>
+    typeof j.tool_id === "string" ? j.tool_id : j.tool_id?.id
+  ).filter(Boolean);
+}
+
 export async function fetchTools(
   params: FetchToolsParams = {}
 ): Promise<FetchToolsResult> {
@@ -29,14 +57,16 @@ export async function fetchTools(
   if (featuredOnly) filter["is_featured"] = { _eq: true };
   if (pricingType) filter["pricing_type"] = { _eq: pricingType };
   if (groupSlug) {
-    filter["groups"] = { group_id: { slug: { _eq: groupSlug } } };
+    const toolIds = await resolveToolIdsForGroup(client as any, groupSlug);
+    if (toolIds === null || toolIds.length === 0) return { tools: [], total: 0 };
+    filter["id"] = { _in: toolIds };
   }
 
   const [tools, countResult] = await Promise.all([
     client.request(
       readItems("tools", {
         filter,
-        search: search || undefined,
+        ...(search ? { search } : {}),
         limit: safeLimit,
         offset,
         sort: ["-is_featured", "-created_at"],
@@ -52,17 +82,13 @@ export async function fetchTools(
           "is_featured",
           "status",
           "created_at",
-          "groups.id",
-          "groups.group_id.id",
-          "groups.group_id.name",
-          "groups.group_id.slug",
         ],
       })
     ),
     client.request(
       readItems("tools", {
         filter,
-        search: search || undefined,
+        ...(search ? { search } : {}),
         aggregate: { count: ["id"] },
       })
     ),
@@ -70,7 +96,28 @@ export async function fetchTools(
 
   const total = Number((countResult as Array<{ count: { id: number } }>)[0]?.count?.id ?? 0);
 
-  return { tools: tools as Tool[], total };
+  // Fetch groups for all returned tools via junction table
+  const toolIds = (tools as any[]).map((t) => t.id);
+  const allJunctions = toolIds.length > 0
+    ? await client.request(readItems("tool_groups" as any, {
+        filter: { tool_id: { _in: toolIds } },
+        fields: ["tool_id", "group_id.id", "group_id.name", "group_id.slug"],
+        limit: -1,
+      }))
+    : [];
+
+  const junctionsByToolId: Record<string, any[]> = {};
+  for (const j of allJunctions as any[]) {
+    const tid = typeof j.tool_id === "string" ? j.tool_id : j.tool_id?.id;
+    if (tid) (junctionsByToolId[tid] ??= []).push(j);
+  }
+
+  const toolsWithGroups = (tools as any[]).map((t) => ({
+    ...t,
+    groups: junctionsByToolId[t.id] ?? [],
+  }));
+
+  return { tools: toolsWithGroups as Tool[], total };
 }
 
 export async function fetchFeaturedTools(limit = 6): Promise<Tool[]> {
@@ -81,58 +128,64 @@ export async function fetchFeaturedTools(limit = 6): Promise<Tool[]> {
 export async function fetchToolBySlug(slug: string): Promise<Tool | null> {
   const client = getDirectusClient();
 
+  // Fetch base tool fields
   const results = await client.request(
     readItems("tools", {
       filter: { slug: { _eq: slug }, status: { _eq: "published" } },
       limit: 1,
       fields: [
-        "id",
-        "name",
-        "slug",
-        "overview",
-        "pricing_type",
-        "pricing_min",
-        "pricing_max",
-        "pricing_label",
-        "pros",
-        "cons",
-        "is_featured",
-        "status",
-        "created_at",
-        "updated_at",
-        "groups.id",
-        "groups.group_id.id",
-        "groups.group_id.name",
-        "groups.group_id.slug",
-        "reviews.id",
-        "reviews.review_text",
-        "reviews.type",
-        "reviews.created_at",
-        "alternatives.id",
-        "alternatives.alt_name",
-        "alternatives.alt_url",
-        "alternatives.alt_tool_id",
-        "awards.id",
-        "awards.award_id.id",
-        "awards.award_id.name",
-        "awards.award_id.description",
-        "awards.award_id.icon_url",
-        "awards.awarded_at",
-        "tutorials.id",
-        "tutorials.title",
-        "tutorials.url",
-        "tutorials.type",
-        "faq.id",
-        "faq.question",
-        "faq.answer",
-        "faq.status",
-        "news.id",
-        "news.title",
-        "news.source_url",
-        "news.published_at",
+        "id", "name", "slug", "overview",
+        "pricing_type", "pricing_min", "pricing_max", "pricing_label",
+        "pros", "cons", "is_featured", "status", "created_at", "updated_at",
       ],
     })
   );
 
-  return (results[0] as Tool) ?? null;
+  const tool = results[0] as any;
+  if (!tool) return null;
+
+  // Fetch all relations in parallel via their own collections
+  // (Directus did not create O2M alias fields on tools, so nested fields don't work)
+  const [junctions, reviews, alternatives, tutorials, faq, news] = await Promise.all([
+    client.request(readItems("tool_groups" as any, {
+      filter: { tool_id: { _eq: tool.id } },
+      fields: ["id", "group_id.id", "group_id.name", "group_id.slug"],
+      limit: -1,
+    })),
+    client.request(readItems("reviews" as any, {
+      filter: { tool_id: { _eq: tool.id } },
+      fields: ["id", "review_text", "type", "created_at"],
+      limit: -1,
+    })),
+    client.request(readItems("alternatives" as any, {
+      filter: { tool_id: { _eq: tool.id } },
+      fields: ["id", "alt_name", "alt_url", "alt_tool_id"],
+      limit: -1,
+    })),
+    client.request(readItems("tutorials" as any, {
+      filter: { tool_id: { _eq: tool.id } },
+      fields: ["id", "title", "url", "type"],
+      limit: -1,
+    })),
+    client.request(readItems("faq" as any, {
+      filter: { tool_id: { _eq: tool.id } },
+      fields: ["id", "question", "answer", "status"],
+      limit: -1,
+    })),
+    client.request(readItems("news" as any, {
+      filter: { tool_id: { _eq: tool.id } },
+      fields: ["id", "title", "content", "source_url", "source_name", "published_at"],
+      sort: ["-published_at"],
+      limit: 4,
+    })),
+  ]);
+
+  tool.groups = junctions;
+  tool.reviews = reviews;
+  tool.alternatives = alternatives;
+  tool.tutorials = tutorials;
+  tool.faq = faq;
+  tool.news = news;
+
+  return tool as Tool;
 }
