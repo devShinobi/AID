@@ -346,6 +346,47 @@ async function main() {
     console.log(`✅ Created ${faqs.length} FAQs`);
   }
 
+  // ── Awards ───────────────────────────────────────────────────────────────────
+  const existingAwards: any[] = await client.request(readItems("awards" as any, { limit: 1 }));
+  if (existingAwards.length > 0) {
+    console.log("⏭️  Awards already seeded — skipping");
+  } else {
+    const awardDefs = [
+      { name: "Editor's Choice", description: "Awarded to tools that stand out for quality, innovation, and usefulness.", icon_url: null, year: 2024 },
+      { name: "Most Popular", description: "Given to tools with the highest community engagement and usage.", icon_url: null, year: 2024 },
+      { name: "Best Free Tool", description: "Recognises the highest-quality tool available at no cost.", icon_url: null, year: 2024 },
+      { name: "Best for Developers", description: "Top-rated tool for software engineering workflows.", icon_url: null, year: 2024 },
+      { name: "Best Image Generator", description: "Outstanding AI tool for image creation and editing.", icon_url: null, year: 2024 },
+      { name: "Best Productivity Tool", description: "Top AI tool for enhancing personal or team productivity.", icon_url: null, year: 2024 },
+    ];
+
+    const createdAwards: any[] = [];
+    for (const a of awardDefs) {
+      const created: any = await client.request(createItem("awards" as any, a));
+      createdAwards.push(created);
+    }
+    console.log(`✅ Created ${createdAwards.length} awards`);
+
+    const awardByName = Object.fromEntries(createdAwards.map((a: any) => [a.name, a.id]));
+
+    const toolAwards = [
+      { tool_id: toolBySlug["chatgpt"],         award_id: awardByName["Editor's Choice"],       awarded_at: "2024-12-01T00:00:00Z" },
+      { tool_id: toolBySlug["chatgpt"],          award_id: awardByName["Most Popular"],           awarded_at: "2024-12-01T00:00:00Z" },
+      { tool_id: toolBySlug["claude"],           award_id: awardByName["Editor's Choice"],       awarded_at: "2024-12-01T00:00:00Z" },
+      { tool_id: toolBySlug["stable-diffusion"], award_id: awardByName["Best Free Tool"],         awarded_at: "2024-12-01T00:00:00Z" },
+      { tool_id: toolBySlug["stable-diffusion"], award_id: awardByName["Best Image Generator"],   awarded_at: "2024-12-01T00:00:00Z" },
+      { tool_id: toolBySlug["midjourney"],       award_id: awardByName["Best Image Generator"],   awarded_at: "2024-12-01T00:00:00Z" },
+      { tool_id: toolBySlug["github-copilot"],   award_id: awardByName["Best for Developers"],    awarded_at: "2024-12-01T00:00:00Z" },
+      { tool_id: toolBySlug["notion-ai"],        award_id: awardByName["Best Productivity Tool"], awarded_at: "2024-12-01T00:00:00Z" },
+    ];
+
+    for (const ta of toolAwards) {
+      if (!ta.tool_id || !ta.award_id) continue;
+      await client.request(createItem("tool_awards" as any, ta));
+    }
+    console.log(`✅ Created ${toolAwards.length} tool_awards`);
+  }
+
   console.log("\n🎉 Seeding complete!");
   console.log(`\nVisit ${DIRECTUS_URL.replace("8055", "4321")} to see your site.\n`);
 }

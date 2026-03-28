@@ -146,7 +146,7 @@ export async function fetchToolBySlug(slug: string): Promise<Tool | null> {
 
   // Fetch all relations in parallel via their own collections
   // (Directus did not create O2M alias fields on tools, so nested fields don't work)
-  const [junctions, reviews, alternatives, tutorials, faq, news] = await Promise.all([
+  const [junctions, reviews, alternatives, tutorials, faq, news, awards] = await Promise.all([
     client.request(readItems("tool_groups" as any, {
       filter: { tool_id: { _eq: tool.id } },
       fields: ["id", "group_id.id", "group_id.name", "group_id.slug"],
@@ -178,6 +178,11 @@ export async function fetchToolBySlug(slug: string): Promise<Tool | null> {
       sort: ["-published_at"],
       limit: 4,
     })),
+    client.request(readItems("tool_awards" as any, {
+      filter: { tool_id: { _eq: tool.id } },
+      fields: ["id", "award_id.id", "award_id.name", "award_id.description", "award_id.icon_url", "award_id.year", "awarded_at"],
+      limit: -1,
+    })),
   ]);
 
   tool.groups = junctions;
@@ -186,6 +191,7 @@ export async function fetchToolBySlug(slug: string): Promise<Tool | null> {
   tool.tutorials = tutorials;
   tool.faq = faq;
   tool.news = news;
+  tool.awards = awards;
 
   return tool as Tool;
 }
